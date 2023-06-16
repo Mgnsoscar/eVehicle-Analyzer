@@ -51,6 +51,38 @@ class SubwayEvent:
             if 0 < eVehicle <= self.passengersOn and self.passengersOn != 0:
                 return eVehicle - 1
 
+    @classmethod
+    def arrivalsFromTo(cls, startDate: datetime.date, endDate: datetime.date):
+
+        filteredArrivals = {}
+
+        for date in cls.arrivals.keys():
+
+            if startDate <= date <= endDate:
+
+                filteredArrivals[date] = cls.arrivals[date]
+
+        return filteredArrivals
+
+    @classmethod
+    def departuresFromTo(cls, startDate: datetime.date, endDate: datetime.date):
+
+        filteredDepartures = {}
+
+        for date in cls.departures.keys():
+
+            if startDate <= date <= endDate:
+                filteredDepartures[date] = cls.departures[date]
+
+        return filteredDepartures
+
+    # Deletes the class variables. Used only when a new dataset is loaded
+    @classmethod
+    def resetClass(cls):
+
+        cls.arrivals    =   {}
+        cls.departures  =   {}
+
     # If comparing a SubwayEvent to a eVehicle it will check if the eVehicle can be counted as relevant to that SubwayEvent
     def __eq__(self, other):
         if type(other) == eVehicle:
