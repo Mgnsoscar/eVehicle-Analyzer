@@ -1,7 +1,8 @@
 from    dataclasses import  dataclass
-from    datetime    import  datetime
+from utilities import *
 from    typing      import  List
 import  pandas      as      pd
+
 @dataclass
 class eVehicle:
 
@@ -16,6 +17,7 @@ class SubwayEvent:
 
     arrivals    =   {}
     departures  =   {}
+    allEvents   =   {}
 
     __slots__ = ["station", "direction", "scheduledTime", "actualTime", "passengersOn",
                  "passengersOff", "eVehicles", "operatingTime"]
@@ -29,28 +31,39 @@ class SubwayEvent:
         self.passengersOff: int             =   passengersOff
         self.eVehicles:     List[eVehicle]  =   []
 
-        if self.isArrival():
-            SubwayEvent.arrivals[self.actualTime]
-
-    # Checks if the SubwayEvent is a departure or an arrival
+    # Checks if the instance is an arrival
     def isArrival(self):
         if self.direction == "Til":
             return True
         return False
 
+    # Check if the instance is a departure
     def isDeparture(self):
         if self.isArrival():
             return False
         return True
 
-    # Checks if how many passengers are boarding the subway vs how many eVehicles were
-    def passengers_vs_eVehicles(self, nr_eVehicles: int):
+    # Formats the timestamp into a datetime object if it were not allready
+    @stringToDatetime
+    def __formatTime(self):
+
+        time = self.actualTime
+
+        if isinstance(time, datetime.__class__):
+            pass
+        elif int(time[:2]) >= 24:
+            return datetime()
+
+
+    # Returns how many eVehicles can be assigned an instance based on how many passengers got on or off
+    def __passengers_vs_eVehicles(self, nr_eVehicles: int):
 
         for eVehicle in range(1, nr_eVehicles + 1):
 
             if 0 < eVehicle <= self.passengersOn and self.passengersOn != 0:
                 return eVehicle - 1
 
+    # Returns a dictionary with all class instances that are arrivals in between two dates
     @classmethod
     def arrivalsFromTo(cls, startDate: datetime.date, endDate: datetime.date):
 
@@ -64,6 +77,7 @@ class SubwayEvent:
 
         return filteredArrivals
 
+    # Returns a dictionary with all class instances that are departures in between two dates
     @classmethod
     def departuresFromTo(cls, startDate: datetime.date, endDate: datetime.date):
 
@@ -76,9 +90,23 @@ class SubwayEvent:
 
         return filteredDepartures
 
+    # Returns a dictionary with all class instances in between two dates
+    @classmethod
+    def FromTo(cls, startDate: datetime.date, endDate: datetime.date):
+
+        filteredEvents = {}
+
+        for date in cls.allEvents.keys():
+
+            if startDate <= date <= endDate:
+
+                filteredEvents[date] = cls.allEvents[date]
+
+        return filteredEvents
+
     # Deletes the class variables. Used only when a new dataset is loaded
     @classmethod
-    def resetClass(cls):
+    def resetClassVariables(cls):
 
         cls.arrivals    =   {}
         cls.departures  =   {}
